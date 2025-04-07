@@ -1,0 +1,41 @@
+name: Deploy Docusaurus to GitHub Pages (with pnpm)
+
+on:
+  push:
+    branches: [ main ]  # Trigger the workflow on pushes to the main branch
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch_depth: 0  # Must be set to 0 to fetch the full history
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20  # Use the Node.js version required by your Docusaurus project
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest  # Or specify a specific pnpm version
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build website
+        run: pnpm run build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}  # Use the GitHub-provided token
+          publish_dir: ./build  # Docusaurus build output directory
+          publish_branch: gh-pages  # Branch to publish to
+          force_orphan: true # If the gh-pages branch doesn't exist, create it
+          user_name: "github-actions[bot]" # Set the committer username
+          user_email: "github-actions[bot]@users.noreply.github.com" # Set the committer email
